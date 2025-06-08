@@ -1,8 +1,11 @@
-from django.shortcuts import render
-from rest_framework import generics
 from .models import Course
 from .serializers import CourseSerializer
+from rest_framework.viewsets import ModelViewSet
 
-class CoursesViewAll(generics.ListAPIView):
+
+class CourseAPI(ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+
+
+

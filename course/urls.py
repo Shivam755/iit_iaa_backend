@@ -1,6 +1,10 @@
-from . import views
-from django.urls import path
+from .views import CourseAPI
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r'courses', CourseAPI)
 
 urlpatterns = [
-    path("", views.CoursesViewAll.as_view(), name="view-all-courses")
+    path('', include(router.urls))
 ]
