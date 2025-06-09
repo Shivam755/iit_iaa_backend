@@ -9,3 +9,8 @@ class Course(models.Model):
 
     def __str__(self):
         return f"{self.title}({self.course_code})"
+    
+class CourseInstance(models.Model):
+    year = models.CharField(max_length=4, default='')
+    semester = models.IntegerField(default=0)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="instances")
