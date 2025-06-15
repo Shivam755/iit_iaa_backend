@@ -1,4 +1,5 @@
 .env
 .env-container
-DOCKERFILE
+Dockerfile
+.dockerignore
 docker-compose.yml

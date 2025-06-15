@@ -1,7 +1,18 @@
 name: iit_iaa_project
 
 services:
-  iit_project:
+  ui:
+    image: superslayer4/iit_project:ui
+    container_name: iit_iaa_frontend_container
+    env_file:
+      - .env
+    ports:
+      - "3001:3000"
+    volumes:
+      - ".:/frontend"
+    depends_on:
+      - api
+  api:
     image: superslayer4/iit_project:api
     container_name: iit_iaa_backend_container
     env_file: 
@@ -10,6 +21,8 @@ services:
       - "8001:8000"
     volumes:
       - ".:/backend"
+    depends_on:
+      - postgres
   postgres:
     image: postgres
     container_name: iit_iaa_postgres_container
