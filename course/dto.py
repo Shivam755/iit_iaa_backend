@@ -11,8 +11,10 @@ class CourseViewInstanceDTO(serializers.ModelSerializer):
         model=CourseInstance
         fields = ['id', 'year', 'semester', 'course_title', 'course_code', 'course_id']
     
-    def get_year_sem(self, obj):
-        return f"{obj.year}-{obj.semester}"
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["course_code"] = data["course_code"].upper() if data["course_code"] else None
+        return data
 
 class CourseCreateInstanceDTO(serializers.Serializer):
     course_id = serializers.CharField(source='course.id')
@@ -25,11 +27,16 @@ class CourseCreateInstanceDTO(serializers.Serializer):
         return value
 
     def create(self, validated_data):
-        print(validated_data)
-        course = Course.objects.get(id=validated_data['course']['id'])
+        course_id = validated_data['course']['id']
+        year = validated_data['year']
+        semester = validated_data['semester']
+        courseInstance = CourseInstance.objects.filter(year=year, semester=semester, course_id=course_id)
+        if courseInstance:
+            raise serializers.ValidationError(f"An Instance already exists for course_id:{course_id}, year:{year} and semester:{semester}")
+        course = Course.objects.get(id=course_id)
         return CourseInstance.objects.create(
-            year=validated_data['year'],
-            semester=validated_data['semester'],
+            year=year,
+            semester=semester,
             course=course
         )
 

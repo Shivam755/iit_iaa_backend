@@ -7,11 +7,20 @@ WORKDIR /backend
 
 COPY ./requirements.txt .
 
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN apk update && \
+    apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev python3-dev && \
+    apk add --no-cache geos gdal proj binutils postgresql-client && \
+    pip install --no-cache-dir -r requirements.txt && \
+    apk del .build-deps
 
 COPY . .
 
+COPY wait-for-postgres.sh /wait-for-postgres.sh
+RUN chmod +x /wait-for-postgres.sh
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 8000
 
-CMD [ "python", "manage.py", "runserver", "0.0.0.0:8000"]
+ENTRYPOINT ["/entrypoint.sh"]

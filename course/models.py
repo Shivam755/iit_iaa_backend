@@ -2,11 +2,16 @@ from django.db import models
 
 class Course(models.Model):
     title = models.CharField(max_length=1000)
-    course_code = models.CharField(max_length=10)
+    course_code = models.CharField(max_length=10, unique=True)
     description = models.CharField(max_length=10000)
     created_date = models.DateTimeField(auto_now_add=True)
-    modified_date = models.DateTimeField(auto_now_add=True)
+    modified_date = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        if self.course_code:
+            self.course_code = self.course_code.lower()
+        super().save(*args, **kwargs)
+        
     def __str__(self):
         return f"{self.title}({self.course_code})"
     
