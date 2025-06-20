@@ -25,11 +25,14 @@ class CourseInstanceAPI(APIView):
     def get(self, request, year, semester, courseId = None):
         courseInstance = CourseInstance.objects.filter(year=year, semester=semester)
         if courseId is not None:
-            courseInstance = courseInstance.filter(course_id=courseId)
-        
-        if courseInstance is None:
-            return Response({"result": f"No instances found for the year-({year}) and semester-({semester})"}, status=status.HTTP_200_OK)
-        return Response(CourseViewInstanceDTO(courseInstance, many=True).data, status=status.HTTP_200_OK)
+            courseInstance = courseInstance.get(course_id=courseId)
+            if courseInstance is None:
+                return Response({"result": f"No instances found for the year-({year}) and semester-({semester}) and Course Id-({courseId})"}, status=status.HTTP_200_OK)
+            return Response(CourseViewInstanceDTO(courseInstance).data, status=status.HTTP_200_OK )
+        else:
+            if courseInstance is None:
+                return Response({"result": f"No instances found for the year-({year}) and semester-({semester})"}, status=status.HTTP_200_OK)
+            return Response(CourseViewInstanceDTO(courseInstance, many=True).data, status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = CourseCreateInstanceDTO(data=request.data)
