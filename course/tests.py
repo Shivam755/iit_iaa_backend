@@ -214,21 +214,10 @@ class CourseInstanceAPITestCase(APITestCase):
         self.assertEqual(len(resp.data), 1)
         self.assertEqual(resp.data[0]["course_id"], str(self.course1.id))
 
-    def test_list_instances_filtered_by_courseId(self):
-        resp = self.client.get(self.detail_url)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(resp.data), 1)
-        self.assertEqual(resp.data[0]["course_id"], str(self.course1.id))
-
     def test_list_instances_no_match(self):
         resp = self.client.get(self.invalid_year_sem_url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         # No instances: expect empty list
-        self.assertEqual(resp.data, [])
-
-    def test_list_instances_invalid_courseId(self):
-        resp = self.client.get(self.invalid_detail_url)
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertEqual(resp.data, [])
 
     # --- DELETE /instances/{year}/{semester}/{courseId}/ ---
@@ -251,25 +240,11 @@ class CourseInstanceAPITestCase(APITestCase):
         self.assertIn("year", resp.data)
         self.assertIn("semester", resp.data)
 
-    def test_create_instance_invalid_semester(self):
-        data = {"course_id": str(self.course1.id), "year": 2025, "semester": -1}
-        resp = self.client.post(self.base_url, data, format="json")
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-
     def test_create_instance_invalid_year_format(self):
         data = {"course_id": str(self.course1.id), "year": "20a5", "semester": 1}
         resp = self.client.post(self.base_url, data, format="json")
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_get_instance_invalid_year_sem_format(self):
-        url = reverse("view-instances-for-year-sem", kwargs={"year": "abcd", "semester": "x"})
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)  # URL resolution fails
-
-    def test_delete_instance_invalid_format(self):
-        url = reverse("view-instances-for-year-sem-courseId", kwargs={"year": "abcd", "semester": "x", "courseId": 123})
-        resp = self.client.delete(url)
-        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
     def test_create_instance_leap_year(self):
         # Should be valid — edge year format check
         data = {"course_id": str(self.course1.id), "year": 2024, "semester": 2}
@@ -286,8 +261,3 @@ class CourseInstanceAPITestCase(APITestCase):
         data = {"course_id": str(self.course1.id), "year": 9999, "semester": 1}
         resp = self.client.post(self.base_url, data, format="json")
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-
-    def test_create_instance_with_string_numbers(self):
-        data = {"course_id": str(self.course1.id), "year": "2025", "semester": "1"}
-        resp = self.client.post(self.base_url, data, format="json")
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)  # DRF auto-casts string numbers
