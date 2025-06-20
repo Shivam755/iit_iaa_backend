@@ -6,6 +6,13 @@ class Course(models.Model):
     description = models.CharField(max_length=10000)
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
+    prerequisites = models.ManyToManyField(
+        'self',
+        symmetrical=False,
+        blank=True,
+        related_name='dependent_courses',
+        help_text="Courses that must be completed before this course."
+    )
 
     def save(self, *args, **kwargs):
         if self.course_code:

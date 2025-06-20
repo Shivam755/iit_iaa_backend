@@ -11,6 +11,15 @@ class CourseAPI(ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.dependent_courses.count() > 0:
+            return Response({"message": "Course cannot be deleted as it is a dependency for other course(s)"}, status=status.HTTP_409_CONFLICT)
+        
+        self.perform_destroy(instance)
+        return Response({"message": "Course deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+
 
 class CourseInstanceAPI(APIView):
     def get(self, request, year, semester, courseId = None):
